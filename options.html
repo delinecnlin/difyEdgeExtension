@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>Dify 扩展配置</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    h2 { margin-top: 0; }
+    .workflow-list { margin-bottom: 24px; }
+    .workflow-item { border: 1px solid #ccc; padding: 12px; margin-bottom: 10px; border-radius: 6px; }
+    .workflow-item input { width: 100%; margin-bottom: 6px; }
+    .workflow-actions { text-align: right; }
+    .add-btn, .remove-btn { margin-top: 6px; }
+    label { display: block; margin-top: 10px; }
+    .collect-options { margin-bottom: 24px; }
+    .collect-options label { display: inline-block; margin-right: 18px; }
+    button { padding: 8px 16px; }
+    .status { margin-top: 10px; color: green; }
+  </style>
+</head>
+<body>
+  <h2>Dify 工作流配置</h2>
+  <form id="options-form">
+    <div class="workflow-list" id="workflowList"></div>
+    <button type="button" class="add-btn" id="addWorkflowBtn">添加工作流</button>
+    <div class="collect-options">
+      <label><input type="checkbox" name="collect" value="title" checked>标题</label>
+      <label><input type="checkbox" name="collect" value="url" checked>URL</label>
+      <label><input type="checkbox" name="collect" value="selectedText" checked>选中文本</label>
+      <label><input type="checkbox" name="collect" value="content" checked>正文内容</label>
+    </div>
+    <label>
+      输入变量名
+      <input type="text" id="inputVarName" placeholder="如 webinfo" required>
+    </label>
+    <button type="submit">保存配置</button>
+    <div class="status" id="status"></div>
+  </form>
+  <script src="options.js"></script>
+</body>
+</html>
