@@ -1,84 +1,181 @@
 // options.js
-// 支持多个工作流配置、采集项筛选、输入变量名
+// 支持工作流卡片展示、增加/删除/编辑、导入导出配置、美观交互（无ID字段）
 
-function createWorkflowItem(workflow, idx, total) {
-  return `
-    <div class="workflow-item" data-idx="${idx}">
-      <label>名称 <input type="text" class="wf-name" value="${workflow.name || ""}" required></label>
-      <label>服务器URL <input type="text" class="wf-url" value="${workflow.difyUrl || ""}" required></label>
-      <label>API Key <input type="text" class="wf-key" value="${workflow.apiKey || ""}" required></label>
-      <div class="workflow-actions">
-        ${total > 1 ? `<button type="button" class="remove-btn">删除</button>` : ""}
+function renderWorkflowCards(workflows) {
+  const list = document.getElementById("workflowList");
+  if (!workflows.length) {
+    list.innerHTML = '<div style="color:#888;text-align:center;padding:18px 0;">暂无已保存工作流</div>';
+    return;
+  }
+  list.innerHTML = workflows.map((wf, idx) => `
+    <div class="workflow-card" data-idx="${idx}">
+      <div class="workflow-card-title">${wf.name || "未命名"}</div>
+      <div class="workflow-card-meta">URL: ${wf.difyUrl || "-"}</div>
+      <div class="workflow-card-meta">API Key: ${wf.apiKey ? "••••••••" : "-"}</div>
+      <div class="workflow-card-actions">
+        <button type="button" class="edit-btn">编辑</button>
+        <button type="button" class="remove-btn">删除</button>
       </div>
     </div>
-  `;
+  `).join("");
 }
 
-function renderWorkflowList(workflows) {
-  const list = document.getElementById("workflowList");
-  list.innerHTML = workflows.map((wf, idx) => createWorkflowItem(wf, idx, workflows.length)).join("");
+function showWorkflowForm(editIdx = null, wf = null) {
+  const form = document.getElementById("workflowForm");
+  form.classList.remove("hidden");
+  form.dataset.editIdx = editIdx !== null ? editIdx : "";
+  document.getElementById("wfName").value = wf ? wf.name : "";
+  document.getElementById("wfUrl").value = wf ? wf.difyUrl : "";
+  document.getElementById("wfApiKey").value = wf ? wf.apiKey : "";
 }
 
-function getWorkflowsFromDOM() {
-  const items = document.querySelectorAll(".workflow-item");
-  return Array.from(items).map(item => ({
-    name: item.querySelector(".wf-name").value.trim(),
-    difyUrl: item.querySelector(".wf-url").value.trim(),
-    apiKey: item.querySelector(".wf-key").value.trim()
-  }));
+function hideWorkflowForm() {
+  const form = document.getElementById("workflowForm");
+  form.classList.add("hidden");
+  form.reset && form.reset();
 }
 
-function getCollectOptionsFromDOM() {
-  return Array.from(document.querySelectorAll('input[name="collect"]:checked')).map(i => i.value);
-}
-
-function setCollectOptions(options) {
-  document.querySelectorAll('input[name="collect"]').forEach(i => {
-    i.checked = options.includes(i.value);
-  });
+function downloadJSON(data, filename) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 100);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   const statusDiv = document.getElementById("status");
-  const form = document.getElementById("options-form");
+  const optionsForm = document.getElementById("options-form");
   const addBtn = document.getElementById("addWorkflowBtn");
+  const exportBtn = document.getElementById("exportBtn");
+  const importBtn = document.getElementById("importBtn");
+  const importFile = document.getElementById("importFile");
+  const workflowForm = document.getElementById("workflowForm");
+  const cancelAddBtn = document.getElementById("cancelAddBtn");
+  const saveWorkflowBtn = document.getElementById("saveWorkflowBtn");
   const inputVarNameInput = document.getElementById("inputVarName");
   let workflows = [];
 
   // 读取已保存配置
-  chrome.storage.sync.get(["workflows", "collectOptions", "inputVarName"], (config) => {
+  chrome.storage.sync.get(["workflows", "collectOptions", "inputVarName", "contentMaxLength"], (config) => {
     workflows = Array.isArray(config.workflows) && config.workflows.length
       ? config.workflows
-      : [{ name: "默认工作流", difyUrl: "", apiKey: "" }];
-    renderWorkflowList(workflows);
+      : [];
+    renderWorkflowCards(workflows);
     setCollectOptions(config.collectOptions || ["title", "url", "selectedText", "content"]);
     inputVarNameInput.value = config.inputVarName || "webinfo";
+    document.getElementById("contentMaxLength").value = config.contentMaxLength || 2000;
   });
 
-  // 添加工作流
+  // 展示新增表单
   addBtn.addEventListener("click", () => {
-    workflows.push({ name: "", difyUrl: "", apiKey: "" });
-    renderWorkflowList(workflows);
+    showWorkflowForm();
   });
 
-  // 删除工作流
+  // 取消新增/编辑
+  cancelAddBtn.addEventListener("click", () => {
+    hideWorkflowForm();
+  });
+
+  // 保存工作流（新增或编辑）
+  workflowForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const wf = {
+      name: document.getElementById("wfName").value.trim(),
+      difyUrl: document.getElementById("wfUrl").value.trim(),
+      apiKey: document.getElementById("wfApiKey").value.trim()
+    };
+    const editIdx = workflowForm.dataset.editIdx;
+    if (editIdx !== "" && !isNaN(editIdx)) {
+      workflows[Number(editIdx)] = wf;
+    } else {
+      workflows.push(wf);
+    }
+    chrome.storage.sync.set({ workflows }, () => {
+      renderWorkflowCards(workflows);
+      hideWorkflowForm();
+      statusDiv.textContent = "工作流已保存！";
+      setTimeout(() => { statusDiv.textContent = ""; }, 1800);
+    });
+  });
+
+  // 删除/编辑工作流
   document.getElementById("workflowList").addEventListener("click", (e) => {
+    const card = e.target.closest(".workflow-card");
+    if (!card) return;
+    const idx = parseInt(card.dataset.idx, 10);
     if (e.target.classList.contains("remove-btn")) {
-      const idx = parseInt(e.target.closest(".workflow-item").dataset.idx, 10);
       workflows.splice(idx, 1);
-      renderWorkflowList(workflows);
+      chrome.storage.sync.set({ workflows }, () => {
+        renderWorkflowCards(workflows);
+        statusDiv.textContent = "已删除工作流";
+        setTimeout(() => { statusDiv.textContent = ""; }, 1200);
+      });
+    } else if (e.target.classList.contains("edit-btn")) {
+      showWorkflowForm(idx, workflows[idx]);
     }
   });
 
-  // 保存配置
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    workflows = getWorkflowsFromDOM();
-    const collectOptions = getCollectOptionsFromDOM();
-    const inputVarName = inputVarNameInput.value.trim() || "webinfo";
-    chrome.storage.sync.set({ workflows, collectOptions, inputVarName }, () => {
-      statusDiv.textContent = "配置已保存！";
-      setTimeout(() => { statusDiv.textContent = ""; }, 2000);
+  // 导出配置
+  exportBtn.addEventListener("click", () => {
+    chrome.storage.sync.get(null, (all) => {
+      downloadJSON(all, "dify-extension-config.json");
     });
   });
+
+  // 导入配置
+  importBtn.addEventListener("click", () => {
+    importFile.value = "";
+    importFile.click();
+  });
+  importFile.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      try {
+        const data = JSON.parse(evt.target.result);
+        chrome.storage.sync.set(data, () => {
+          workflows = Array.isArray(data.workflows) ? data.workflows : [];
+          renderWorkflowCards(workflows);
+          setCollectOptions(data.collectOptions || ["title", "url", "selectedText", "content"]);
+          inputVarNameInput.value = data.inputVarName || "webinfo";
+          statusDiv.textContent = "配置已导入！";
+          setTimeout(() => { statusDiv.textContent = ""; }, 1800);
+        });
+      } catch (err) {
+        statusDiv.textContent = "导入失败，文件格式错误";
+        setTimeout(() => { statusDiv.textContent = ""; }, 2000);
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  // 保存采集项和变量名
+  optionsForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const collectOptions = getCollectOptionsFromDOM();
+    const inputVarName = inputVarNameInput.value.trim() || "webinfo";
+    const contentMaxLength = parseInt(document.getElementById("contentMaxLength").value, 10) || 2000;
+    chrome.storage.sync.set({ collectOptions, inputVarName, contentMaxLength }, () => {
+      statusDiv.textContent = "配置已保存！";
+      setTimeout(() => { statusDiv.textContent = ""; }, 1800);
+    });
+  });
+
+  // 工具函数
+  function getCollectOptionsFromDOM() {
+    return Array.from(document.querySelectorAll('input[name="collect"]:checked')).map(i => i.value);
+  }
+  function setCollectOptions(options) {
+    document.querySelectorAll('input[name="collect"]').forEach(i => {
+      i.checked = options.includes(i.value);
+    });
+  }
 });

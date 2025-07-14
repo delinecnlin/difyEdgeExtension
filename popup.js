@@ -40,7 +40,15 @@ document.addEventListener("DOMContentLoaded", () => {
       const tab = tabs[0];
       chrome.tabs.sendMessage(tab.id, { action: "getPageInfo" }, (pageInfo) => {
         if (chrome.runtime.lastError) {
-          statusDiv.textContent = `错误: ${chrome.runtime.lastError.message}`;
+          // 友好提示
+          if (
+            chrome.runtime.lastError.message &&
+            chrome.runtime.lastError.message.includes("Could not establish connection")
+          ) {
+            statusDiv.textContent = "当前页面不支持扩展采集。";
+          } else {
+            statusDiv.textContent = `错误: ${chrome.runtime.lastError.message}`;
+          }
           console.error(chrome.runtime.lastError);
           return;
         }
