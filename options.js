@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let workflows = [];
 
   // 读取已保存配置
-  chrome.storage.sync.get(["workflows", "collectOptions", "inputVarName", "contentMaxLength"], (config) => {
+  chrome.storage.sync.get(["workflows", "collectOptions", "inputVarName", "contentMaxLength", "defaultWorkflowIdx"], (config) => {
     workflows = Array.isArray(config.workflows) && config.workflows.length
       ? config.workflows
       : [];
@@ -71,6 +71,15 @@ document.addEventListener("DOMContentLoaded", () => {
     setCollectOptions(config.collectOptions || ["title", "url", "selectedText", "content"]);
     inputVarNameInput.value = config.inputVarName || "webinfo";
     document.getElementById("contentMaxLength").value = config.contentMaxLength || 2000;
+    const defaultSelect = document.getElementById("defaultWorkflowIdx");
+    defaultSelect.innerHTML = workflows.map((wf, idx) => `<option value="${idx}">${wf.name || wf.workflowId || "Unnamed"}</option>`).join("");
+    defaultSelect.value = Number.isInteger(config.defaultWorkflowIdx) ? config.defaultWorkflowIdx : 0;
+    defaultSelect.addEventListener("change", () => {
+      chrome.storage.sync.set({ defaultWorkflowIdx: parseInt(defaultSelect.value, 10) }, () => {
+        statusDiv.textContent = "默认工作流已更新";
+        setTimeout(() => { statusDiv.textContent = ""; }, 1800);
+      });
+    });
   });
 
   // 展示新增表单
