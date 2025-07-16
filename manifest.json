@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Dify Workflow Caller",
   "version": "1.0.0",
-  "description": "Usage Instructions:\n1. Sends current page information (title, URL, content, selected text) to a Dify server workflow for automated processing.\n2. Add Dify workflows on the extension options page (enter server URL, API key, input parameter name; workflow type only).\n3. On Dify, create a workflow with a string input parameter (e.g., webinfo) matching the extension settings.\n4. Sent format:\n   Title: <page title>\n   URL: <page URL>\n   Selected Text: <user selected text>\n   Content: <first 2000 characters of page content>\n5. \"Current page not supported\" means the page's security policy prevents script injection.\nSee README.md for details.",
+  "description": "Automatically captures and sends detailed information from the current webpage — including page title, URL, selected text, and main content — to user-configured Dify workflows for instant AI-driven processing. Users can customize server endpoints, API keys, input parameter names, and workflow types on the options page. Supports multiple workflows per page and secure data handling, enabling seamless automated analysis, summarization, translation, and other customizable AI tasks.",
   "permissions": [
     "scripting",
     "activeTab",
