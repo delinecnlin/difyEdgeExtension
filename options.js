@@ -4,17 +4,17 @@
 function renderWorkflowCards(workflows) {
   const list = document.getElementById("workflowList");
   if (!workflows.length) {
-    list.innerHTML = '<div style="color:#888;text-align:center;padding:18px 0;">暂无已保存工作流</div>';
+    list.innerHTML = '<div style="color:#888;text-align:center;padding:18px 0;">No saved workflows</div>';
     return;
   }
   list.innerHTML = workflows.map((wf, idx) => `
     <div class="workflow-card" data-idx="${idx}">
-      <div class="workflow-card-title">${wf.name || "未命名"}</div>
+      <div class="workflow-card-title">${wf.name || "Unnamed"}</div>
       <div class="workflow-card-meta">URL: ${wf.difyUrl || "-"}</div>
       <div class="workflow-card-meta">API Key: ${wf.apiKey ? "••••••••" : "-"}</div>
       <div class="workflow-card-actions">
-        <button type="button" class="edit-btn">编辑</button>
-        <button type="button" class="remove-btn">删除</button>
+        <button type="button" class="edit-btn">Edit</button>
+        <button type="button" class="remove-btn">Delete</button>
       </div>
     </div>
   `).join("");
@@ -100,7 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
     chrome.storage.sync.set({ workflows }, () => {
       renderWorkflowCards(workflows);
       hideWorkflowForm();
-      statusDiv.textContent = "工作流已保存！";
+      statusDiv.textContent = "Workflow saved!";
       setTimeout(() => { statusDiv.textContent = ""; }, 1800);
     });
   });
@@ -114,7 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
       workflows.splice(idx, 1);
       chrome.storage.sync.set({ workflows }, () => {
         renderWorkflowCards(workflows);
-        statusDiv.textContent = "已删除工作流";
+        statusDiv.textContent = "Workflow deleted";
         setTimeout(() => { statusDiv.textContent = ""; }, 1200);
       });
     } else if (e.target.classList.contains("edit-btn")) {
@@ -146,11 +146,11 @@ document.addEventListener("DOMContentLoaded", () => {
           renderWorkflowCards(workflows);
           setCollectOptions(data.collectOptions || ["title", "url", "selectedText", "content"]);
           inputVarNameInput.value = data.inputVarName || "webinfo";
-          statusDiv.textContent = "配置已导入！";
+          statusDiv.textContent = "Configuration imported!";
           setTimeout(() => { statusDiv.textContent = ""; }, 1800);
         });
       } catch (err) {
-        statusDiv.textContent = "导入失败，文件格式错误";
+        statusDiv.textContent = "Import failed: invalid file format";
         setTimeout(() => { statusDiv.textContent = ""; }, 2000);
       }
     };
@@ -164,7 +164,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const inputVarName = inputVarNameInput.value.trim() || "webinfo";
     const contentMaxLength = parseInt(document.getElementById("contentMaxLength").value, 10) || 2000;
     chrome.storage.sync.set({ collectOptions, inputVarName, contentMaxLength }, () => {
-      statusDiv.textContent = "配置已保存！";
+      statusDiv.textContent = "Configuration saved!";
       setTimeout(() => { statusDiv.textContent = ""; }, 1800);
     });
   });

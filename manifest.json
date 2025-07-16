@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Dify Workflow Caller",
   "version": "1.0.0",
-  "description": "【用法说明】\n1. 本扩展可将当前网页信息（标题、URL、正文、选中文本）一键发送到 Dify 服务器的“工作流”进行自动化处理。\n2. 请在扩展配置页添加 Dify 工作流（需填写服务器URL、API Key、输入参数名，且必须为“工作流”类型，不能是聊天流）。\n3. Dify 端需新建“工作流”，入口节点设置输入参数（如 webinfo，类型为字符串），与扩展设置一致。\n4. 发送到 Dify 的格式如下：\n标题: <网页标题>\nURL: <网页地址>\n选中文本: <用户选中的文本>\n正文内容: <网页正文前2000字>\n5. 如遇“当前页面不支持扩展采集”提示，说明该网页因安全策略无法注入脚本。\n详细说明请见扩展包内 README-使用说明.md。",
+  "description": "Usage Instructions:\n1. Sends current page information (title, URL, content, selected text) to a Dify server workflow for automated processing.\n2. Add Dify workflows on the extension options page (enter server URL, API key, input parameter name; workflow type only).\n3. On Dify, create a workflow with a string input parameter (e.g., webinfo) matching the extension settings.\n4. Sent format:\n   Title: <page title>\n   URL: <page URL>\n   Selected Text: <user selected text>\n   Content: <first 2000 characters of page content>\n5. \"Current page not supported\" means the page's security policy prevents script injection.\nSee README.md for details.",
   "permissions": [
     "scripting",
     "activeTab",
@@ -33,8 +33,12 @@
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"],
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
       "run_at": "document_idle"
     }
   ],

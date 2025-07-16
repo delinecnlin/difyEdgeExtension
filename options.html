@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Dify 扩展配置</title>
+  <title>Dify Extension Settings</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
@@ -148,11 +148,11 @@
 </head>
 <body>
   <div class="container">
-    <h2>Dify 工作流配置</h2>
+    <h2>Dify Workflow Configuration</h2>
     <div class="workflow-list" id="workflowList"></div>
-    <button type="button" class="add-btn" id="addWorkflowBtn">增加工作流</button>
-    <button type="button" class="export-btn" id="exportBtn">导出配置</button>
-    <button type="button" class="import-btn" id="importBtn">导入配置</button>
+    <button type="button" class="add-btn" id="addWorkflowBtn">Add Workflow</button>
+    <button type="button" class="export-btn" id="exportBtn">Export Config</button>
+    <button type="button" class="import-btn" id="importBtn">Import Config</button>
     <input type="file" id="importFile" class="import-file" accept=".json">
     <style>
       .edit-btn {
@@ -173,38 +173,38 @@
     </style>
     <hr class="section-divider">
     <form id="workflowForm" class="form-section hidden">
-      <label>名称
-        <input type="text" id="wfName" placeholder="如 默认工作流" required>
+      <label>Name
+        <input type="text" id="wfName" placeholder="e.g. Default Workflow" required>
       </label>
-      <label>服务器URL
+      <label>Server URL
         <input type="text" id="wfUrl" placeholder="https://your-dify-server.com/" required>
       </label>
       <label>API Key
         <input type="text" id="wfApiKey" placeholder="app-xxxx..." required>
       </label>
       <div class="workflow-card-actions">
-        <button type="button" id="cancelAddBtn">取消</button>
-        <button type="submit" id="saveWorkflowBtn">保存</button>
+        <button type="button" id="cancelAddBtn">Cancel</button>
+        <button type="submit" id="saveWorkflowBtn">Save</button>
       </div>
     </form>
     <hr class="section-divider">
     <form id="options-form">
       <div class="collect-options">
-        <label><input type="checkbox" name="collect" value="title" checked>标题</label>
+        <label><input type="checkbox" name="collect" value="title" checked>Title</label>
         <label><input type="checkbox" name="collect" value="url" checked>URL</label>
-        <label><input type="checkbox" name="collect" value="selectedText" checked>选中文本</label>
-        <label><input type="checkbox" name="collect" value="content" checked>正文内容</label>
+        <label><input type="checkbox" name="collect" value="selectedText" checked>Selected Text</label>
+        <label><input type="checkbox" name="collect" value="content" checked>Content</label>
       </div>
       <label>
-        正文最大长度
+        Max Content Length
         <input type="number" id="contentMaxLength" min="100" max="20000" step="100" value="2000" style="width:120px;" required>
-        <span style="font-size:0.96em;color:#888;">（建议2000~10000，过长可能影响性能）</span>
+        <span style="font-size:0.96em;color:#888;">(Recommended 2000~10000, too long may impact performance)</span>
       </label>
       <label>
-        输入变量名
-        <input type="text" id="inputVarName" placeholder="如 webinfo" required>
+        Input Variable Name
+        <input type="text" id="inputVarName" placeholder="e.g. webinfo" required>
       </label>
-      <button type="submit">保存配置</button>
+      <button type="submit">Save Configuration</button>
       <div class="status" id="status"></div>
     </form>
   </div>

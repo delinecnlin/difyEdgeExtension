@@ -1,5 +1,5 @@
 // content.js
-// 根据配置采集页面信息
+ // Collect page information based on configuration
 
 console.log("Dify extension content script loaded.");
 
@@ -20,7 +20,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         console.log("Sending page info:", pageInfo);
         sendResponse(pageInfo);
       });
-    return true; // 异步
+    return true; // Asynchronous
   }
   return false;
 });

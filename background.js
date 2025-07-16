@@ -6,13 +6,13 @@ function registerContextMenus(workflows) {
     workflows.forEach((wf, idx) => {
       chrome.contextMenus.create({
         id: "dify-workflow-" + idx,
-        title: `发送到：${wf.name || wf.workflowId || "未命名"}`,
+        title: `Send to: ${wf.name || wf.workflowId || "Unnamed"}`,
         contexts: ["page", "selection"]
       });
     });
     chrome.contextMenus.create({
       id: "dify-config",
-      title: "配置 Dify 工作流...",
+      title: "Configure Dify Workflow...",
       contexts: ["page", "selection"]
     });
   });
@@ -23,7 +23,7 @@ function initMenus() {
   chrome.storage.sync.get(["workflows"], (config) => {
     const workflows = Array.isArray(config.workflows) && config.workflows.length
       ? config.workflows
-      : [{ name: "默认工作流", difyUrl: "", apiKey: "", workflowId: "" }];
+      : [{ name: "Default Workflow", difyUrl: "", apiKey: "", workflowId: "" }];
     registerContextMenus(workflows);
   });
 }
@@ -69,23 +69,23 @@ function callDifyWorkflowByIndex(idx, pageInfo) {
   chrome.storage.sync.get(["workflows", "inputVarName"], (config) => {
     const workflows = Array.isArray(config.workflows) && config.workflows.length
       ? config.workflows
-      : [{ name: "默认工作流", difyUrl: "", apiKey: "" }];
+      : [{ name: "Default Workflow", difyUrl: "", apiKey: "" }];
     const wf = workflows[idx] || workflows[0];
     const inputVarName = config.inputVarName && typeof config.inputVarName === "string" ? config.inputVarName : "webinfo";
     if (!wf.difyUrl || !wf.apiKey) {
       chrome.notifications.create({
         type: "basic",
         iconUrl: "icons/icon48.png",
-        title: "Dify 配置缺失",
-        message: "请先在扩展选项中配置 Dify 服务器URL和API Key。"
+        title: "Dify Configuration Missing",
+        message: "Please configure Dify server URL and API Key in extension options first."
       });
       return;
     }
     const formattedInfo = `
-标题: ${pageInfo.title || ""}
+Title: ${pageInfo.title || ""}
 URL: ${pageInfo.url || ""}
-选中文本: ${pageInfo.selectedText || ""}
-正文内容: ${pageInfo.content || ""}
+Selected Text: ${pageInfo.selectedText || ""}
+Content: ${pageInfo.content || ""}
 `.trim();
 
     fetch(`${wf.difyUrl}/v1/workflows/run`, {
@@ -103,22 +103,22 @@ URL: ${pageInfo.url || ""}
         chrome.notifications.create({
           type: "basic",
           iconUrl: "icons/icon48.png",
-          title: "Dify 调用成功",
-          message: `已成功调用：${wf.name || "未命名工作流"}`
+          title: "Dify Call Successful",
+          message: `Successfully called: ${wf.name || "Unnamed Workflow"}`
         });
       } else {
         chrome.notifications.create({
           type: "basic",
           iconUrl: "icons/icon48.png",
-          title: "Dify 调用失败",
-          message: `状态: ${res.status}, 响应: ${responseText.slice(0, 100)}`
+          title: "Dify Call Failed",
+          message: `Status: ${res.status}, Response: ${responseText.slice(0, 100)}`
         });
       }
     }).catch(e => {
       chrome.notifications.create({
         type: "basic",
         iconUrl: "icons/icon48.png",
-        title: "Dify 调用异常",
+        title: "Dify Call Exception",
         message: e.message
       });
     });
